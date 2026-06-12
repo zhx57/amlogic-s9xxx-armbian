@@ -20,7 +20,7 @@ on:
           - ophub
       kernel_version:
         description: "Select kernel version"
-        required: false
+        required: true
         default: "6.18.y"
         type: choice
         options:
@@ -77,12 +77,12 @@ on:
           - noble
       kernel_sign:
         description: "Set the kernel custom signature"
-        required: false
+        required: true
         default: "-ophub"
         type: choice
         options:
           - -ophub
-          - -yourname
+          - -fucklz
 
 env:
   TZ: Etc/UTC
@@ -187,7 +187,7 @@ jobs:
             kernel-${{ inputs.kernel_toolchain }}-${{ matrix.kernel_version }}-
 
       - name: Compile the kernel [ ${{ matrix.kernel_version }} ]
-        uses: ophub/amlogic-s9xxx-armbian@main
+        uses: zhx57/amlogic-s9xxx-armbian@main
         if: ${{ steps.disk.outputs.status == 'success' && !cancelled() }}
         with:
           build_target: kernel
