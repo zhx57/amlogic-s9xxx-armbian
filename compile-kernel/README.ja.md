@@ -42,7 +42,7 @@ sudo apt-get install -y $(cat compile-kernel/tools/script/ubuntu2404-build-armbi
 | パラメータ | 意味          | 説明                             |
 | --------- | ------------ | ------------------------------- |
 | -r     | Repository  | カーネルソースコードリポジトリを指定します。`github.com` 上のカーネルソースコードリポジトリを選択でき、例えば `-r unifreq`。パラメータ形式は `owner/repo@branch` の3部分の組み合わせをサポートし、オーナー名 `owner` は必須、リポジトリ名 `/repo` とブランチ名 `@branch` は任意です。オーナー名のみ指定した場合、そのオーナー配下で `linux-5.x.y` 形式の名前かつ `main` ブランチのカーネルソースコードリポジトリを自動的にマッチします。リポジトリ名やブランチ名が異なる場合は、`owner@branch`、`owner/repo`、`owner/repo@branch` のように組み合わせて指定してください。デフォルト値：`unifreq` |
-| -k     | Kernel      | カーネルバージョンを指定します。例：`-k 5.15.100`。複数のカーネルは `_` で区切ります。例：`-k 5.15.100_5.15.50`。`-k all` を使用するとすべてのメインラインカーネルをコンパイルし、現在は `-k 5.10.y_5.15.y_6.1.y_6.6.y_6.12.y_6.18.y` と同等です。カーネルリストは上流カーネルソースリポジトリ [unifreq](https://github.com/unifreq) のメンテナンス状況に応じて動的に調整されます。 |
+| -k     | Kernel      | カーネルバージョンを指定します。例：`-k 5.15.100`。複数のカーネルは `_` で区切ります。例：`-k 5.15.100_5.15.50`。`-k all` を使用するとすべてのメインラインカーネルをコンパイルし、現在は `-k 5.10.y_5.15.y_6.1.y_6.6.y_6.12.y_6.18.y_7.0.y` と同等です。カーネルリストは上流カーネルソースリポジトリ [unifreq](https://github.com/unifreq) のメンテナンス状況に応じて動的に調整されます。 |
 | -a     | AutoKernel  | 同系列の最新バージョンカーネルを自動的に採用するかどうかを設定します。`true` に設定すると、`-k` で指定したカーネル（例：`5.15.100`）と同じ系列にさらに新しいバージョンがあるか自動的にチェックし、存在する場合は最新版に自動切り替えします。`false` に設定すると指定バージョンをコンパイルします。デフォルト値：`true` |
 | -m     | MakePackage | カーネルビルドのパッケージリストを設定します。`all` に設定すると `Image、modules、dtbs` のすべてのファイルを生成し、`dtbs` に設定すると DTB ファイル3つのみ生成します。デフォルト値：`all` |
 | -f     | configFlavor | カーネルリポジトリ [ophub/kernel](https://github.com/ophub/kernel/tree/main/kernel-config/release) から設定ファイル `config-*` をローカルの [tools/config](tools/config) ディレクトリにダウンロードする際のフレーバーを指定します。対応するカーネルバージョンの設定ファイルがローカルに既に存在し、このパラメータが未設定の場合はダウンロードをスキップします。選択肢はカーネルリポジトリに存在する[ディレクトリ名](https://github.com/ophub/kernel/tree/main/kernel-config/release)で、例：`stable` / `rk3588` / `rk35xx`。デフォルト値：`stable` |
@@ -78,7 +78,7 @@ sudo apt-get install -y $(cat compile-kernel/tools/script/ubuntu2404-build-armbi
   uses: ophub/amlogic-s9xxx-armbian@main
   with:
     build_target: kernel
-    kernel_version: 6.12.y_6.18.y
+    kernel_version: 6.12.y_6.18.y_7.0.y
     kernel_auto: true
     kernel_sign: -yourname
 ```
@@ -120,7 +120,7 @@ uses: YOUR-REPO/amlogic-s9xxx-armbian@main
 
 | パラメータ                         | デフォルト値            | 説明                           |
 | -------------------------------- | --------------------- | ------------------------------ |
-| ${{ env.PACKAGED_OUTPUTTAGS }}   | 6.12.y_6.18.y         | コンパイル済みカーネル名          |
+| ${{ env.PACKAGED_OUTPUTTAGS }}   | 6.12.y_6.18.y_7.0.y         | コンパイル済みカーネル名          |
 | ${{ env.PACKAGED_OUTPUTPATH }}   | compile-kernel/output | コンパイル済みカーネルファイルのディレクトリ |
 | ${{ env.PACKAGED_OUTPUTDATE }}   | 04.13.1058            | コンパイル日付（月.日.時分）       |
 | ${{ env.PACKAGED_STATUS }}       | success               | コンパイル状態：success / failure |

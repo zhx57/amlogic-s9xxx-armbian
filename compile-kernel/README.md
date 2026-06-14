@@ -42,7 +42,7 @@ You can compile the kernel directly in an [Armbian](https://github.com/ophub/aml
 | Parameter | Meaning      | Description |
 | --------- | ----------- | ----------- |
 | -r        | Repository  | Specifies the kernel source code repository for compilation. You can choose a kernel source code repository from `github.com`, e.g., `-r unifreq`. The parameter format supports a combination of three components: `owner/repo@branch`. The owner name `owner` is required; the repository name `/repo` and branch name `@branch` are optional. When only the owner name is specified, the script automatically matches a repository named `linux-5.x.y` on the `main` branch under that owner. If the repository name or branch name differs, specify them in combination, e.g., `owner@branch`, `owner/repo`, or `owner/repo@branch`. Default: `unifreq` |
-| -k        | Kernel      | Specifies the kernel version, e.g., `-k 5.15.100`. Multiple kernels are separated with `_`, e.g., `-k 5.15.100_5.15.50`. Using `-k all` compiles all mainline kernels, currently equivalent to `-k 5.10.y_5.15.y_6.1.y_6.6.y_6.12.y_6.18.y`. The kernel list is dynamically adjusted based on the maintenance status of the upstream source repository [unifreq](https://github.com/unifreq). |
+| -k        | Kernel      | Specifies the kernel version, e.g., `-k 5.15.100`. Multiple kernels are separated with `_`, e.g., `-k 5.15.100_5.15.50`. Using `-k all` compiles all mainline kernels, currently equivalent to `-k 5.10.y_5.15.y_6.1.y_6.6.y_6.12.y_6.18.y_7.0.y`. The kernel list is dynamically adjusted based on the maintenance status of the upstream source repository [unifreq](https://github.com/unifreq). |
 | -a        | AutoKernel  | Sets whether to automatically adopt the latest version within the same kernel series. When set to `true`, the script checks if a newer version exists in the same series as the kernel specified via `-k` (e.g., `5.15.100`), and automatically switches to the latest version if available. When set to `false`, the specified kernel version is compiled as-is. Default: `true` |
 | -m        | MakePackage | Sets the package list for building the kernel. When set to `all`, all files including `Image, modules, dtbs` are built. When set to `dtbs`, only the 3 DTB files are generated. Default: `all` |
 | -f        | configFlavor | Specifies which configuration file `config-*` to download from the kernel repository [ophub/kernel](https://github.com/ophub/kernel/tree/main/kernel-config/release) to the local [tools/config](tools/config)￼ directory. If a configuration file matching the kernel version already exists locally and this parameter is not set, the download is skipped. Available options correspond to the [directory names](https://github.com/ophub/kernel/tree/main/kernel-config/release) in the kernel repository, e.g., `stable` / `rk3588` / `rk35xx`. Default: `stable`. |
@@ -78,7 +78,7 @@ You can compile the kernel directly in an [Armbian](https://github.com/ophub/aml
   uses: ophub/amlogic-s9xxx-armbian@main
   with:
     build_target: kernel
-    kernel_version: 6.12.y_6.18.y
+    kernel_version: 6.12.y_6.18.y_7.0.y
     kernel_auto: true
     kernel_sign: -yourname
 ```
@@ -120,7 +120,7 @@ To upload to `Releases`, you need to set `Workflow read/write permissions` for t
 
 | Parameter                        | Default Value   | Description                            |
 |----------------------------------|-----------------|----------------------------------------|
-| ${{ env.PACKAGED_OUTPUTTAGS }}   | 6.12.y_6.18.y   | The name of the compiled kernel.       |
+| ${{ env.PACKAGED_OUTPUTTAGS }}   | 6.12.y_6.18.y_7.0.y   | The name of the compiled kernel.       |
 | ${{ env.PACKAGED_OUTPUTPATH }}   | compile-kernel/output | The directory path where the compiled kernel files are stored. |
 | ${{ env.PACKAGED_OUTPUTDATE }}   | 04.13.1058      | Compilation date (month.day.hourminute). |
 | ${{ env.PACKAGED_STATUS }}       | success         | Compilation status: success / failure. |

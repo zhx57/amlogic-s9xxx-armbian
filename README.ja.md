@@ -243,7 +243,7 @@ sudo apt-get install -y $(cat compile-kernel/tools/script/ubuntu2404-build-armbi
     build_target: armbian
     armbian_path: build/output/images/*.img
     armbian_board: s905d_s905x3_s922x_s905x
-    armbian_kernel: 6.12.y_6.18.y
+    armbian_kernel: 6.12.y_6.18.y_7.0.y
 ```
 
 - ### GitHub Actions入力パラメータの説明
@@ -256,7 +256,7 @@ sudo apt-get install -y $(cat compile-kernel/tools/script/ubuntu2404-build-armbi
 | armbian_board   | all           | パッケージボックスの`board`を設定。`-b`を参照       |
 | kernel_repo     | ophub/kernel  | github.comのカーネルリポジトリの`<owner>/<repo>`を指定。`-r`を参照 |
 | kernel_usage    | stable        | 使用するカーネルの`タグサフィックス`を設定。`-u`を参照 |
-| armbian_kernel  | 6.12.y_6.18.y | カーネルの[バージョン](https://github.com/ophub/kernel/releases/tag/kernel_stable)を設定。`-k`を参照 |
+| armbian_kernel  | 6.12.y_6.18.y_7.0.y | カーネルの[バージョン](https://github.com/ophub/kernel/releases/tag/kernel_stable)を設定。`-k`を参照 |
 | auto_kernel     | true          | 同じシリーズの最新バージョンのカーネルを自動的に採用するかどうかを設定。`-a`を参照       |
 | armbian_fstype  | ext4          | システムのROOTFSパーティションのファイルシステムタイプを設定。`-t`を参照  |
 | armbian_size    | 512/2560      | システムのBOOTFSおよびROOTFSパーティションのサイズを設定。`-s`を参照  |
@@ -286,7 +286,7 @@ Armbianシステムの[Docker](https://hub.docker.com/u/ophub)イメージの作
   uses: ophub/amlogic-s9xxx-armbian@main
   with:
     build_target: kernel
-    kernel_version: 6.12.y_6.18.y
+    kernel_version: 6.12.y_6.18.y_7.0.y
     kernel_auto: true
     kernel_sign: -yourname
 ```

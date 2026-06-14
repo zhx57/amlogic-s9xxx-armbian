@@ -243,7 +243,7 @@ sudo apt-get install -y $(cat compile-kernel/tools/script/ubuntu2404-build-armbi
     build_target: armbian
     armbian_path: build/output/images/*.img
     armbian_board: s905d_s905x3_s922x_s905x
-    armbian_kernel: 6.12.y_6.18.y
+    armbian_kernel: 6.12.y_6.18.y_7.0.y
 ```
 
 - ### GitHub Actions Input Parameter Description
@@ -286,7 +286,7 @@ For kernel compilation instructions, see [compile-kernel](compile-kernel).
   uses: ophub/amlogic-s9xxx-armbian@main
   with:
     build_target: kernel
-    kernel_version: 6.12.y_6.18.y
+    kernel_version: 6.12.y_6.18.y_7.0.y
     kernel_auto: true
     kernel_sign: -yourname
 ```

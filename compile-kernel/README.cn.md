@@ -42,7 +42,7 @@ sudo apt-get install -y $(cat compile-kernel/tools/script/ubuntu2404-build-armbi
 | 参数    | 含义        | 说明                             |
 | ------ | ----------- | ------------------------------- |
 | -r     | Repository  | 指定编译内核的源代码仓库。可选择 `github.com` 上的内核源代码仓库，例如 `-r unifreq`。参数格式支持 `owner/repo@branch` 三部分组合，其中所有者名称 `owner` 为必选参数，仓库名称 `/repo` 和分支名称 `@branch` 为可选参数。当仅指定所有者名称时，将自动匹配该所有者下名称符合 `linux-5.x.y` 格式且分支为 `main` 的内核源代码仓库。若仓库名称或分支名称不同，请使用组合方式指定，如 `owner@branch`、`owner/repo` 或 `owner/repo@branch`。默认值：`unifreq` |
-| -k     | Kernel      | 指定内核版本，如 `-k 5.15.100`。多个内核以 `_` 分隔，如 `-k 5.15.100_5.15.50`。使用 `-k all` 表示编译全部主线内核，当前等价于 `-k 5.10.y_5.15.y_6.1.y_6.6.y_6.12.y_6.18.y`，内核列表会随上游内核源码仓库 [unifreq](https://github.com/unifreq) 的维护状态动态调整。 |
+| -k     | Kernel      | 指定内核版本，如 `-k 5.15.100`。多个内核以 `_` 分隔，如 `-k 5.15.100_5.15.50`。使用 `-k all` 表示编译全部主线内核，当前等价于 `-k 5.10.y_5.15.y_6.1.y_6.6.y_6.12.y_6.18.y_7.0.y`，内核列表会随上游内核源码仓库 [unifreq](https://github.com/unifreq) 的维护状态动态调整。 |
 | -a     | AutoKernel  | 设置是否自动采用同系列最新版本内核。设为 `true` 时，将自动检查 `-k` 指定的内核（如 `5.15.100`）同系列是否存在更新版本，若存在则自动切换为最新版。设为 `false` 时则编译指定版本。默认值：`true` |
 | -m     | MakePackage | 设置内核构建的包列表。设为 `all` 时生成 `Image、modules、dtbs` 全部文件；设为 `dtbs` 时仅生成 3 个 DTB 文件。默认值：`all` |
 | -f     | configFlavor | 指定从内核仓库 [ophub/kernel](https://github.com/ophub/kernel/tree/main/kernel-config/release) 下载的配置文件 `config-*` 到本地 [tools/config](tools/config) 目录。若本地已存在对应内核版本的配置文件且未设置此参数，则跳过下载。可选项为内核仓库中存在的[目录名](https://github.com/ophub/kernel/tree/main/kernel-config/release)，例如：`stable` / `rk3588` / `rk35xx`。默认值：`stable` |
@@ -78,7 +78,7 @@ sudo apt-get install -y $(cat compile-kernel/tools/script/ubuntu2404-build-armbi
   uses: ophub/amlogic-s9xxx-armbian@main
   with:
     build_target: kernel
-    kernel_version: 6.12.y_6.18.y
+    kernel_version: 6.12.y_6.18.y_7.0.y
     kernel_auto: true
     kernel_sign: -yourname
 ```
@@ -120,7 +120,7 @@ uses: YOUR-REPO/amlogic-s9xxx-armbian@main
 
 | 参数                            | 默认值                 | 说明                           |
 | ------------------------------ | --------------------- | ------------------------------ |
-| ${{ env.PACKAGED_OUTPUTTAGS }} | 6.12.y_6.18.y         | 编译完成的内核名称                |
+| ${{ env.PACKAGED_OUTPUTTAGS }} | 6.12.y_6.18.y_7.0.y         | 编译完成的内核名称                |
 | ${{ env.PACKAGED_OUTPUTPATH }} | compile-kernel/output | 编译完成的内核文件所在目录      |
 | ${{ env.PACKAGED_OUTPUTDATE }} | 04.13.1058            | 编译日期（月.日.时分）            |
 | ${{ env.PACKAGED_STATUS }}     | success               | 编译状态：success / failure     |
