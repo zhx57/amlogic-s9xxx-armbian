@@ -41,7 +41,7 @@ sudo apt-get install -y $(cat compile-kernel/tools/script/ubuntu2404-build-armbi
 
 | パラメータ | 意味          | 説明                             |
 | --------- | ------------ | ------------------------------- |
-| -r     | Repository  | カーネルソースコードリポジトリを指定します。`github.com` 上のカーネルソースコードリポジトリを選択でき、例えば `-r unifreq`。パラメータ形式は `owner/repo@branch` の3部分の組み合わせをサポートし、オーナー名 `owner` は必須、リポジトリ名 `/repo` とブランチ名 `@branch` は任意です。オーナー名のみ指定した場合、そのオーナー配下で `linux-5.x.y` 形式の名前かつ `main` ブランチのカーネルソースコードリポジトリを自動的にマッチします。リポジトリ名やブランチ名が異なる場合は、`owner@branch`、`owner/repo`、`owner/repo@branch` のように組み合わせて指定してください。デフォルト値：`unifreq` |
+| -r     | Repository  | カーネルソースコードリポジトリを指定します。3つの形式をサポート：(1) GitHub 短名、例えば `-r unifreq`、パラメータ形式 `owner/repo@branch`；オーナー名 `owner` は必須、リポジトリ名 `/repo` とブランチ名 `@branch` は任意。オーナー名のみ指定した場合、そのオーナー配下で `linux-*.y` 形式の名前かつ `main` ブランチのカーネルソースコードリポジトリを自動的にマッチします。(2) kernel.org エイリアス：`-r kernel.org`（安定版、ブランチ `linux-X.Y.y`）または `-r torvalds`（メインライン）。(3) 完全な git URL：`-r https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git@linux-X.Y.y` — `git clone` で到達可能な任意の URL を使用できます。デフォルト値：`unifreq` |
 | -k     | Kernel      | カーネルバージョンを指定します。例：`-k 5.15.100`。複数のカーネルは `_` で区切ります。例：`-k 5.15.100_5.15.50`。`-k all` を使用するとすべてのメインラインカーネルをコンパイルし、現在は `-k 5.10.y_5.15.y_6.1.y_6.6.y_6.12.y_6.18.y_7.0.y` と同等です。カーネルリストは上流カーネルソースリポジトリ [unifreq](https://github.com/unifreq) のメンテナンス状況に応じて動的に調整されます。 |
 | -a     | AutoKernel  | 同系列の最新バージョンカーネルを自動的に採用するかどうかを設定します。`true` に設定すると、`-k` で指定したカーネル（例：`5.15.100`）と同じ系列にさらに新しいバージョンがあるか自動的にチェックし、存在する場合は最新版に自動切り替えします。`false` に設定すると指定バージョンをコンパイルします。デフォルト値：`true` |
 | -m     | MakePackage | カーネルビルドのパッケージリストを設定します。`all` に設定すると `Image、modules、dtbs` のすべてのファイルを生成し、`dtbs` に設定すると DTB ファイル3つのみ生成します。デフォルト値：`all` |

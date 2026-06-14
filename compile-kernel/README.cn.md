@@ -41,7 +41,7 @@ sudo apt-get install -y $(cat compile-kernel/tools/script/ubuntu2404-build-armbi
 
 | 参数    | 含义        | 说明                             |
 | ------ | ----------- | ------------------------------- |
-| -r     | Repository  | 指定编译内核的源代码仓库。可选择 `github.com` 上的内核源代码仓库，例如 `-r unifreq`。参数格式支持 `owner/repo@branch` 三部分组合，其中所有者名称 `owner` 为必选参数，仓库名称 `/repo` 和分支名称 `@branch` 为可选参数。当仅指定所有者名称时，将自动匹配该所有者下名称符合 `linux-5.x.y` 格式且分支为 `main` 的内核源代码仓库。若仓库名称或分支名称不同，请使用组合方式指定，如 `owner@branch`、`owner/repo` 或 `owner/repo@branch`。默认值：`unifreq` |
+| -r     | Repository  | 指定编译内核的源代码仓库。支持三种形式：(1) GitHub 短名，例如 `-r unifreq`，参数格式 `owner/repo@branch`，所有者 `owner` 必选，`/repo` 和 `@branch` 可选；仅指定所有者时将自动匹配该所有者下名为 `linux-*.y` 且分支为 `main` 的内核源代码仓库。(2) kernel.org 别名：`-r kernel.org`（稳定版，分支 `linux-X.Y.y`）或 `-r torvalds`（主线）。(3) 完整 git URL：`-r https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git@linux-X.Y.y` — 任何可被 `git clone` 访问的 URL 都可以。默认值：`unifreq` |
 | -k     | Kernel      | 指定内核版本，如 `-k 5.15.100`。多个内核以 `_` 分隔，如 `-k 5.15.100_5.15.50`。使用 `-k all` 表示编译全部主线内核，当前等价于 `-k 5.10.y_5.15.y_6.1.y_6.6.y_6.12.y_6.18.y_7.0.y`，内核列表会随上游内核源码仓库 [unifreq](https://github.com/unifreq) 的维护状态动态调整。 |
 | -a     | AutoKernel  | 设置是否自动采用同系列最新版本内核。设为 `true` 时，将自动检查 `-k` 指定的内核（如 `5.15.100`）同系列是否存在更新版本，若存在则自动切换为最新版。设为 `false` 时则编译指定版本。默认值：`true` |
 | -m     | MakePackage | 设置内核构建的包列表。设为 `all` 时生成 `Image、modules、dtbs` 全部文件；设为 `dtbs` 时仅生成 3 个 DTB 文件。默认值：`all` |

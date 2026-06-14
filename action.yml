@@ -50,7 +50,7 @@ inputs:
     default: ""
   # For compile kernel -----
   kernel_source:
-    description: "Select the kernel source code"
+    description: "Select the kernel source code. GitHub owner short-form (e.g. unifreq, ophub), kernel.org aliases (kernel.org / korg / torvalds), or full git URLs are supported."
     required: false
     default: "unifreq"
   kernel_version:

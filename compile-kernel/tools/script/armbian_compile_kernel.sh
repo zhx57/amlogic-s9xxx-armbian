@@ -291,12 +291,52 @@ init_var() {
         esac
     done
 
-    # Receive the value entered by the [ -r ] parameter
-    input_r_value="${repo_owner//https\:\/\/github\.com\//}"
-    code_owner="$(echo "${input_r_value}" | awk -F '@' '{print $1}' | awk -F '/' '{print $1}')"
-    code_repo="$(echo "${input_r_value}" | awk -F '@' '{print $1}' | awk -F '/' '{print $2}')"
-    code_branch="$(echo "${input_r_value}" | awk -F '@' '{print $2}')"
-    #
+    # Receive the value entered by the [ -r ] parameter.
+    # Supports three forms:
+    #   1) GitHub short form: "owner" / "owner/repo" / "owner/repo@branch"
+    #      → cloned from https://github.com/<owner>/<linux-X.Y.y or repo>.git
+    #   2) kernel.org alias: "kernel.org" or "korg" or "torvalds"
+    #      → cloned from https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git
+    #      (torvalds uses the mainline tree instead)
+    #   3) Full git URL: "https://host/path/to/repo.git" or "https://host/path/to/repo.git@branch"
+    input_r_value="${repo_owner}"
+    code_owner=""
+    code_repo=""
+    code_branch=""
+    code_git_url=""        # empty == GitHub mode; non-empty == full URL mode
+    code_korg_flavor=""    # "stable" | "torvalds" | "" (not korg)
+
+    # Split optional @branch suffix first
+    if [[ "${input_r_value}" == *"@"* ]]; then
+        _r_without_branch="${input_r_value%%@*}"
+        code_branch="${input_r_value#*@}"
+    else
+        _r_without_branch="${input_r_value}"
+    fi
+
+    if [[ "${_r_without_branch}" == *"://"* ]]; then
+        # Full URL mode: clone the given URL directly
+        code_git_url="${_r_without_branch}"
+        code_owner="$(echo "${code_git_url}" | awk -F '/' '{print $(NF-0)"}' | sed 's/\.git$//')"
+        [[ -z "${code_owner}" ]] && code_owner="linux"
+        code_repo="${code_owner}"
+    elif [[ "${_r_without_branch}" == "kernel.org" || "${_r_without_branch}" == "korg" || "${_r_without_branch}" == "stable" ]]; then
+        code_korg_flavor="stable"
+        code_git_url="https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git"
+        code_owner="stable"
+        code_repo="linux"
+    elif [[ "${_r_without_branch}" == "torvalds" || "${_r_without_branch}" == "korg-torvalds" ]]; then
+        code_korg_flavor="torvalds"
+        code_git_url="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git"
+        code_owner="torvalds"
+        code_repo="linux"
+    else
+        # GitHub short-form: strip any "https://github.com/" prefix, then parse
+        _r_stripped="${_r_without_branch//https:\/\/github.com\//}"
+        code_owner="$(echo "${_r_stripped}" | awk -F '/' '{print $1}')"
+        code_repo="$(echo "${_r_stripped}" | awk -F '/' '{print $2}')"
+    fi
+
     [[ -n "${code_owner}" ]] || error_msg "The [ -r ] parameter is invalid."
     [[ -n "${code_branch}" ]] || code_branch="${repo_branch}"
 
@@ -404,17 +444,42 @@ query_version() {
         # Identify the kernel mainline
         MAIN_LINE="$(echo ${KERNEL_VAR} | awk -F '.' '{print $1"."$2}')"
 
-        if [[ -z "${code_repo}" ]]; then linux_repo="linux-${MAIN_LINE}.y"; else linux_repo="${code_repo}"; fi
-        github_kernel_repo="${code_owner}/${linux_repo}/${code_branch}"
-        github_kernel_ver="https://raw.githubusercontent.com/${github_kernel_repo}/Makefile"
-        # latest_version="125"
-        latest_version="$(curl -fsSL -m 20 ${github_kernel_ver} 2>/dev/null | grep -oE "^SUBLEVEL = .*" | head -n 1 | grep -oE '[0-9]{1,3}')"
+        # Choose the Makefile URL based on the source mode (GitHub / kernel.org / arbitrary URL)
+        if [[ -n "${code_git_url}" ]]; then
+            # kernel.org (git.kernel.org) mode
+            # stable branch: linux-X.Y.y; torvalds: master
+            if [[ "${code_korg_flavor}" == "stable" ]]; then
+                _branch="linux-${MAIN_LINE}.y"
+            elif [[ "${code_korg_flavor}" == "torvalds" ]]; then
+                _branch="${code_branch}"
+            else
+                _branch="${code_branch}"
+            fi
+
+            if [[ "${code_git_url}" == *git.kernel.org* ]]; then
+                # git.kernel.org/cgit-style URL: /plain/Makefile?h=BRANCH
+                makefile_url="${code_git_url%/}/plain/Makefile?h=${_branch}"
+            else
+                # other generic cgit/gitweb pattern fallback: /plain/raw?h=BRANCH
+                # Try cgit-style URL and,
+                makefile_url="${code_git_url%/}/plain/Makefile?h=${_branch}"
+                # Fallback (gitlab/github,
+            fi
+            source_desc="${code_git_url}@${_branch}"
+        else
+            # GitHub short-form original behavior
+            if [[ -z "${code_repo}" ]]; then linux_repo="linux-${MAIN_LINE}.y"; else linux_repo="${code_repo}"; fi
+            makefile_url="https://raw.githubusercontent.com/${code_owner}/${linux_repo}/${code_branch}/Makefile"
+            source_desc="github.com/${code_owner}/${linux_repo}"
+        fi
+
+        latest_version="$(curl -fsSL -m 20 ${makefile_url} 2>/dev/null | grep -oE "^SUBLEVEL = .*" | head -n 1 | grep -oE '[0-9]{1,3}')"
         if [[ -n "${latest_version}" ]]; then
             tmp_arr_kernels[${i}]="${MAIN_LINE}.${latest_version}"
         else
-            error_msg "Failed to query the kernel version in [ github.com/${github_kernel_repo} ]"
+            error_msg "Failed to query the kernel version in [ ${source_desc} ]"
         fi
-        echo -e "${INFO} (${i}) [ ${tmp_arr_kernels[$i]} ] is github.com/${github_kernel_repo} latest kernel. \n"
+        echo -e "${INFO} (${i}) [ ${tmp_arr_kernels[$i]} ] is ${source_desc} latest kernel. \n"
 
         ((i++))
     done
@@ -472,15 +537,29 @@ get_kernel_source() {
 
     [[ -d "${kernel_path}" ]] || mkdir -p ${kernel_path}
 
+    # Decide the clone URL and branch. When code_git_url is set, use it directly
+    # (kernel.org / full URL mode). Otherwise fall back to the original GitHub path.
+    if [[ -n "${code_git_url}" ]]; then
+        if [[ "${code_korg_flavor}" == "stable" ]]; then
+            _clone_branch="linux-${kernel_verpatch}.y"
+        else
+            _clone_branch="${code_branch}"
+        fi
+        _clone_url="${code_git_url}"
+    else
+        _clone_branch="${code_branch}"
+        _clone_url="https://github.com/${server_kernel_repo}"
+    fi
+
     if [[ ! -d "${kernel_path}/${local_kernel_path}" ]]; then
-        echo -e "${INFO} Cloning from [ https://github.com/${server_kernel_repo} -b ${code_branch} ]"
+        echo -e "${INFO} Cloning from [ ${_clone_url} -b ${_clone_branch} ]"
 
         # Clone the latest kernel source code. If it fails, wait 1 minute and try again, try 10 times.
         for i in {1..10}; do
-            git clone -q --single-branch --depth=1 --branch=${code_branch} https://github.com/${server_kernel_repo} ${kernel_path}/${local_kernel_path}
+            git clone -q --single-branch --depth=1 --branch=${_clone_branch} ${_clone_url} ${kernel_path}/${local_kernel_path}
             [[ "${?}" -eq "0" ]] && break || sleep 60
         done
-        [[ "${?}" -eq "0" ]] || error_msg "[ https://github.com/${server_kernel_repo} ] Clone failed."
+        [[ "${?}" -eq "0" ]] || error_msg "[ ${_clone_url} ] Clone failed."
     else
         # Get a local kernel version
         local_makefile="${kernel_path}/${local_kernel_path}/Makefile"
@@ -492,7 +571,7 @@ get_kernel_source() {
         if [[ "${auto_kernel}" =~ ^(true|yes)$ ]] && [[ "${kernel_sub}" -gt "${local_makefile_sublevel}" ]]; then
             # Pull the latest source code of the server
             cd ${kernel_path}/${local_kernel_path}
-            git checkout ${code_branch} && git reset --hard origin/${code_branch} && git pull
+            git checkout ${_clone_branch} && git reset --hard origin/${_clone_branch} && git pull
             unset kernel_version
             kernel_version="${local_makefile_version}.${local_makefile_patchlevel}.${kernel_sub}"
             echo -e "${INFO} Synchronize the upstream source code, compile the kernel version [ ${kernel_version} ]."
@@ -1486,8 +1565,18 @@ loop_recompile() {
         # kernel <SUBLEVEL>, such as [ 15 ]
         kernel_sub="$(echo ${kernel_version} | awk -F '.' '{print $3}')"
 
-        # The loop variable assignment
-        if [[ -z "${code_repo}" ]]; then
+        # The loop variable assignment.
+        # When running with a full URL (kernel.org / custom git host), keep the
+        # full URL in server_kernel_repo (get_kernel_source will use it verbatim);
+        # otherwise use the original GitHub short form.
+        if [[ -n "${code_git_url}" ]]; then
+            server_kernel_repo="${code_git_url}"
+            if [[ "${code_korg_flavor}" == "stable" ]]; then
+                local_kernel_path="linux-${kernel_verpatch}.y"
+            else
+                local_kernel_path="$(echo "${code_git_url}" | awk -F '/' '{print $(NF)}' | sed 's/\.git$//')-linux-${kernel_verpatch}.y"
+            fi
+        elif [[ -z "${code_repo}" ]]; then
             server_kernel_repo="${code_owner}/linux-${kernel_verpatch}.y"
             local_kernel_path="linux-${kernel_verpatch}.y"
         else
